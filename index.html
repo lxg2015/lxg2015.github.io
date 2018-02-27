@@ -118,7 +118,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/02/27/batch-normalization/" data-id="cje5alu0a0000rv5g20xixdx0" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/02/27/batch-normalization/" data-id="cje5anw7s0000vd5gekbiqj5n" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -150,11 +150,42 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h1 id="Batch-Normalization-Accelerating-Deep-Network-Training-by-Reducing-Internal-Covariate-Shift-2015"><a href="#Batch-Normalization-Accelerating-Deep-Network-Training-by-Reducing-Internal-Covariate-Shift-2015" class="headerlink" title="Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift  2015"></a>Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift  2015</h1><h2 id="abstract"><a href="#abstract" class="headerlink" title="abstract"></a>abstract</h2><p>把训练过程中，网络中间层输入数据分布的改变(因为前层网络参数随着反向传播变化，导致本层网络的输入数据的分布发生变化)称为:”Internal Covariate Shift”<br>为解决这个问题，提出BN结构，并使其称为网络模型中的一部分，对每一个输入batch做标准化。</p>
+<ul>
+<li>使用BN层，可以提高学习率</li>
+<li>参数初始化不再那么重要</li>
+<li>有规则化作用，从而可以省去dropout层<br>使用bach-normalized networks的集成，在ImageNet上得到了超过人的分类准确率。</li>
+</ul>
+<h2 id="introduction"><a href="#introduction" class="headerlink" title="introduction"></a>introduction</h2><p>使用mini-batch gradient descent 与 stochastic gradient descent相比的优点  </p>
+<ul>
+<li>随着batch_size的增大，梯度估计会更准确</li>
+<li>batch能够并行化，从而使计算更高效。  </li>
+</ul>
+<p>当一个学习系统的输入分布变化时，称为covariate shift，以往使用domain adaption解决。<br>internal covariate shift就是对系统输入到子系统输入的推广，作者提出batch normalization来解决这个问题，它能够标准化输入从而称为均值为$0$、方差为$1$的输入，而且，BN对梯度反向传播也有作用，减少了梯度对参数大小及初始值的依赖？</p>
+<h2 id="towards-reducing-internal-covariate-shift"><a href="#towards-reducing-internal-covariate-shift" class="headerlink" title="towards reducing internal covariate shift"></a>towards reducing internal covariate shift</h2><p>通过修改网络或修改优化算法的参数。<strong>看的不太懂</strong></p>
+<h2 id="normalization-via-mini-batch-statics"><a href="#normalization-via-mini-batch-statics" class="headerlink" title="normalization via mini-batch statics"></a>normalization via mini-batch statics</h2><p>两个简化</p>
+<ol>
+<li>使用标准化替代白化，假设一层网络的输入为$d$维向量，$x=(x^{(1)},x^{(2)}……x^{(d)})$<blockquote>
+<p>$$\hat x_k = \frac{x^{(k)}-\bold{E}[x^{(k)}]}{\sqrt{Var[x^{(k)}]}} \quad \text{标准化}$$<br>然而标准化操作会改变一层的表达能力，如sigmoid函数，如果它的输入被标准化，那么它的输出只分布在sigmoid线性部分，即要保证插入的层能够表示identity 变换，由此，添加变换<br>$$y^{(k)}=\gamma^{(k)} x^{(k)}+\beta ^{(k)}$$<br>当$\gamma^{k}=Var[x^{(k)}]$，$\beta^{(k)}=\bold{E}[x^{(k)}]$时，相当于identity变换(没有变换)  </p>
+</blockquote>
+</li>
+<li>在mini-batch内计算均值与标准差</li>
+</ol>
+<p>算法1</p>
+<blockquote>
+<p>$$\mu_B \leftarrow \frac{1}{m}\sum_i^m x_i\quad\text{mini-batch mean}$$ (1)<br>$$\sigma_B^2 \leftarrow \frac{1}{m}\sum_i^m (x_i - \mu_B)^2\quad\text{mini-batch variance}$$(2)<br>$$\hat x_i \leftarrow \frac{x_i-\mu_B}{\sqrt{\sigma_B^2 +\epsilon}}\quad\text{normalize}$$(3)<br>$$y_i \leftarrow \gamma\hat x_i+\beta \quad \text{scale and shift}$$ (4)<br>求导部分</p>
+</blockquote>
+<h3 id="training-and-inference-with-batch-normalised-networks"><a href="#training-and-inference-with-batch-normalised-networks" class="headerlink" title="training and inference with batch-normalised networks"></a>training and inference with batch-normalised networks</h3><p>预测时，使用整个训练集的均值和方差</p>
+<blockquote>
+<p>$$\hat x=\frac{x-\bold{E}(x)}{\sqrt{Var[x]+\epsilon}}$$<br>在算法2中有$\bold{E[x]}$，$Var[x]$的计算公式<br>$$\bold{E}[x]\leftarrow \bold{E}_B[\mu_B]$$<br>$$Var[x]\leftarrow \frac{m}{m-1}\bold{E}_B[\sigma_B^2]$$</p>
+</blockquote>
+<h3 id="batch-normalized-convolutional-networks"><a href="#batch-normalized-convolutional-networks" class="headerlink" title="batch-normalized convolutional networks"></a>batch-normalized convolutional networks</h3><p>在非线性激活函数之前加BN层，这样添加能够输出更稳定的响应。<br>对于$Wx+b$<br>BN层前面的偏置参数的作用，被BN层归一化时抵消掉了</p>
+<h3 id="batch-normalization-enables-higher-leraning-rate"><a href="#batch-normalization-enables-higher-leraning-rate" class="headerlink" title="batch-normalization enables higher leraning rate"></a>batch-normalization enables higher leraning rate</h3><h1 id="tips"><a href="#tips" class="headerlink" title="tips"></a>tips</h1><p>没有找到$\gamma,\beta$是如何初始化的<br>有论文专门探讨dropout与bn层结合使用效果差的原因，并提出解决方法。</p>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/02/27/test/" data-id="cje5alu0h0002rv5glm5xn0ll" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/02/27/test/" data-id="cje5anw7w0001vd5gvz4s1c6o" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -199,7 +230,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/02/27/hello-world/" data-id="cje5alu0f0001rv5g2g1e9xsb" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/02/27/hello-world/" data-id="cje5anw7y0002vd5g460b7lag" class="article-share-link">Teilen</a>
       
       
     </footer>
