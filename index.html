@@ -402,148 +402,6 @@ internal covariate shift就是对系统输入到子系统输入的推广，作�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/27/test/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/02/27/test/" itemprop="url">test</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-27T14:34:16+08:00">2018-02-27</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="batch-normalization-accelerating-deep-network-training-by-reducing-internal-covariate-shift-2015">Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift 2015</h1>
-<h2 id="abstract">abstract</h2>
-<p>把训练过程中，网络中间层输入数据分布的改变(因为前层网络参数随着反向传播变化，导致本层网络的输入数据的分布发生变化)称为:&quot;Internal Covariate Shift&quot;<br>
-为解决这个问题，提出BN结构，并使其称为网络模型中的一部分，对每一个输入batch做标准化。 - 使用BN层，可以提高学习率 - 参数初始化不再那么重要 - 有规则化作用，从而可以省去dropout层 使用bach-normalized networks的集成，在ImageNet上得到了超过人的分类准确率。</p>
-<h2 id="introduction">introduction</h2>
-<p>使用mini-batch gradient descent 与 stochastic gradient descent相比的优点<br>
-- 随着batch_size的增大，梯度估计会更准确 - batch能够并行化，从而使计算更高效。</p>
-<p>当一个学习系统的输入分布变化时，称为covariate shift，以往使用domain adaption解决。<br>
-internal covariate shift就是对系统输入到子系统输入的推广，作者提出batch normalization来解决这个问题，它能够标准化输入从而称为均值为<span class="math inline">\(0\)</span>、方差为<span class="math inline">\(1\)</span>的输入，而且，BN对梯度反向传播也有作用，减少了梯度对参数大小及初始值的依赖？</p>
-<h2 id="towards-reducing-internal-covariate-shift">towards reducing internal covariate shift</h2>
-<p>通过修改网络或修改优化算法的参数。<strong>看的不太懂</strong></p>
-<h2 id="normalization-via-mini-batch-statics">normalization via mini-batch statics</h2>
-<p>两个简化 1. 使用标准化替代白化，假设一层网络的输入为<span class="math inline">\(d\)</span>维向量，<span class="math inline">\(x=(x^{(1)},x^{(2)}......x^{(d)})\)</span> &gt; <span class="math display">\[\hat x_k = \frac{x^{(k)}-\bold{E}[x^{(k)}]}{\sqrt{Var[x^{(k)}]}} \quad \text{标准化}\]</span> 然而标准化操作会改变一层的表达能力，如sigmoid函数，如果它的输入被标准化，那么它的输出只分布在sigmoid线性部分，即要保证插入的层能够表示identity 变换，由此，添加变换 &gt; <span class="math display">\[y^{(k)}=\gamma^{(k)} x^{(k)}+\beta ^{(k)}\]</span> 当<span class="math inline">\(\gamma^{k}=Var[x^{(k)}]\)</span>，<span class="math inline">\(\beta^{(k)}=\bold{E}[x^{(k)}]\)</span>时，相当于identity变换(没有变换)<br>
-2. 在mini-batch内计算均值与标准差</p>
-<p>算法1 &gt; <span class="math display">\[\mu_B \leftarrow \frac{1}{m}\sum_i^m x_i\quad\text{mini-batch mean}\]</span> (1) &gt; <span class="math display">\[\sigma_B^2 \leftarrow \frac{1}{m}\sum_i^m (x_i - \mu_B)^2\quad\text{mini-batch variance}\]</span>(2) &gt; <span class="math display">\[\hat x_i \leftarrow \frac{x_i-\mu_B}{\sqrt{\sigma_B^2 +\epsilon}}\quad\text{normalize}\]</span>(3) &gt; <span class="math display">\[y_i \leftarrow \gamma\hat x_i+\beta \quad \text{scale and shift}\]</span> (4) 求导部分 ### training and inference with batch-normalised networks 预测时，使用整个训练集的均值和方差 &gt; <span class="math display">\[\hat x=\frac{x-\bold{E}(x)}{\sqrt{Var[x]+\epsilon}}\]</span> 在算法2中有<span class="math inline">\(\bold{E[x]}\)</span>，<span class="math inline">\(Var[x]\)</span>的计算公式 &gt; <span class="math display">\[\bold{E}[x]\leftarrow \bold{E}_B[\mu_B]\]</span> &gt; <span class="math display">\[Var[x]\leftarrow \frac{m}{m-1}\bold{E}_B[\sigma_B^2]\]</span> ### batch-normalized convolutional networks 在非线性激活函数之前加BN层，这样添加能够输出更稳定的响应。 对于<span class="math inline">\(Wx+b\)</span> BN层前面的偏置参数的作用，被BN层归一化时抵消掉了</p>
-<h3 id="batch-normalization-enables-higher-leraning-rate">batch-normalization enables higher leraning rate</h3>
-<h1 id="tips">tips</h1>
-<p>没有找到<span class="math inline">\(\gamma,\beta\)</span>是如何初始化的<br>
-有论文专门探讨dropout与bn层结合使用效果差的原因，并提出解决方法。</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/27/hello-world/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -709,7 +567,7 @@ internal covariate shift就是对系统输入到子系统输入的推广，作�
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-count">2</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -921,8 +779,6 @@ internal covariate shift就是对系统输入到子系统输入的推广，作�
     
       
         
-      
-    
       
     
       
